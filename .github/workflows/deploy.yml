@@ -4,8 +4,17 @@ on:
   push:
     branches: ["main"]
 
+# Add these permissions to allow GitHub Pages deployment to work
+permissions:
+  contents: read
+  id-token: write
+  pages: write
+
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,10 +24,14 @@ jobs:
         run: |
           sed -i 's/PROD_HF_TOKEN_PLACEHOLDER/${{ secrets.HF_TOKEN }}/g' index.html
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
